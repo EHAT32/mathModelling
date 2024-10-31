@@ -49,6 +49,33 @@ def draw_tree(node, x, y, dx):
             draw_tree(node.right, x + dx, y - 60, dx / 2)
 
 
+def k_means(data, k, tolerance=1e-3, MAX_ITER=500):
+    centroids_idx = np.random.choice(data.shape[0], size=k, replace=False)
+    centroids = data[centroids_idx]
+    labels = _get_labels(data, centroids)
+
+    err = float('inf')
+    iter = 0
+    while err > tolerance and iter < MAX_ITER:
+        new_centroids = _get_centroids(data, labels, k)
+        err = _dist(new_centroids, centroids, axis=1)
+        err = np.mean(_dist(new_centroids, centroids))
+
+    return centroids
+
+
+def _get_centroids(data, labels, k):
+    centroids = np.array([np.mean(data[labels == i], axis=0) for i in range(k)])
+    return centroids
+
+
+def _get_labels(data, centroids):
+    # d_mesh, c_mesh = np.meshgrid(data, centroids)
+    dist = np.linalg.norm(data[:, np.newaxis] - centroids[np.newaxis, :], axis=2)
+    labels = np.argmin(dist, axis=1)
+    return labels
+
+
 def complete_linkage(data):
     clusters = [TreeNode(i) for i in range(data.shape[0])]
     dist_matrix = _dist_matrix(data)
@@ -60,7 +87,7 @@ def complete_linkage(data):
 
         for i in range(n):
             for j in range(i + 1, n):
-                cluster_dist = _single_linkage_dist(dist_matrix, clusters[i], clusters[j])
+                cluster_dist = _complete_linkage_dist(dist_matrix, clusters[i], clusters[j])
 
                 if cluster_dist > max_dist:
                     max_dist = cluster_dist
@@ -130,14 +157,16 @@ def _dist_matrix(data):
     return matr
 
 
-def _dist(x, y):
-    return np.linalg.norm(x - y)
+def _dist(x, y, axis=None):
+    return np.linalg.norm(x - y, axis)
 
-# data = path = "dataset1.csv"
+data = path = "./hw1/dataset1.csv"
 
-# df = pd.read_csv(path)
+df = pd.read_csv(path)
 
-# data = df.to_numpy()[:,1:]
+data = df.to_numpy()[:,1:]
+k_means(data, k=6)
+
 
 # root = complete_linkage(data[:10])
 

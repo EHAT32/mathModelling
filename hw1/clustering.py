@@ -58,10 +58,11 @@ def k_means(data, k, tolerance=1e-3, MAX_ITER=500):
     iter = 0
     while err > tolerance and iter < MAX_ITER:
         new_centroids = _get_centroids(data, labels, k)
-        err = _dist(new_centroids, centroids, axis=1)
-        err = np.mean(_dist(new_centroids, centroids))
+        err = np.mean(np.sum(np.abs(new_centroids - centroids), axis=1))
+        centroids = new_centroids
+        labels = _get_labels(data, centroids)
 
-    return centroids
+    return labels
 
 
 def _get_centroids(data, labels, k):

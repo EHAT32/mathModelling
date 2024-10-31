@@ -49,19 +49,23 @@ def draw_tree(node, x, y, dx):
             draw_tree(node.right, x + dx, y - 60, dx / 2)
 
 
-def k_means(data, k, tolerance=1e-3, MAX_ITER=500):
-    centroids_idx = np.random.choice(data.shape[0], size=k, replace=False)
-    centroids = data[centroids_idx]
-    labels = _get_labels(data, centroids)
-
-    err = float('inf')
-    iter = 0
-    while err > tolerance and iter < MAX_ITER:
-        new_centroids = _get_centroids(data, labels, k)
-        err = np.mean(np.sum(np.abs(new_centroids - centroids), axis=1))
-        centroids = new_centroids
+def k_means(data, k, tolerance=1e-3, MAX_ITER=500, averaging = 5):
+    avg_centroids = np.zeros((k, data.shape[1]))
+    for _ in range(averaging):
+        centroids_idx = np.random.choice(data.shape[0], size=k, replace=False)
+        centroids = data[centroids_idx]
         labels = _get_labels(data, centroids)
 
+        err = float('inf')
+        iter = 0
+        while err > tolerance and iter < MAX_ITER:
+            new_centroids = _get_centroids(data, labels, k)
+            err = np.mean(np.sum(np.abs(new_centroids - centroids), axis=1))
+            centroids = new_centroids
+            labels = _get_labels(data, centroids)
+        avg_centroids += centroids
+    avg_centroids /= averaging
+    labels = _get_labels(data, avg_centroids)
     return labels
 
 
@@ -161,12 +165,12 @@ def _dist_matrix(data):
 def _dist(x, y, axis=None):
     return np.linalg.norm(x - y, axis)
 
-data = path = "./hw1/dataset1.csv"
+# data = path = "./hw1/dataset1.csv"
 
-df = pd.read_csv(path)
+# df = pd.read_csv(path)
 
-data = df.to_numpy()[:,1:]
-k_means(data, k=6)
+# data = df.to_numpy()[:,1:]
+# k_means(data, k=6)
 
 
 # root = complete_linkage(data[:10])

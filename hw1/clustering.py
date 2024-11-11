@@ -1,6 +1,7 @@
 import numpy as np
 import turtle
 import pandas as pd
+import matplotlib.pyplot as plt
 
 class TreeNode:
     def __init__(self, val=0, left=None, right=None):
@@ -165,6 +166,18 @@ def _dist_matrix(data):
 def _dist(x, y, axis=None):
     return np.linalg.norm(x - y, axis)
 
+def plot_u_dendrogram(node, x=0, y=0, dx=1):
+    if node is not None:
+        if node.left is not None:
+            plt.plot([x, x - dx], [y, y - 1], 'k-')  # Left line
+            plot_u_dendrogram(node.left, x - dx, y - 1, dx / 2)
+
+        if node.right is not None:
+            plt.plot([x, x + dx], [y, y - 1], 'k-')  # Right line
+            plot_u_dendrogram(node.right, x + dx, y - 1, dx / 2)
+
+        plt.text(x, y, str(node.val), ha='center', va='bottom', fontsize=10)
+
 # data = path = "./hw1/dataset1.csv"
 
 # df = pd.read_csv(path)
@@ -175,7 +188,9 @@ def _dist(x, y, axis=None):
 
 # root = complete_linkage(data[:10])
 
-# turtle.speed(0) 
-# turtle.hideturtle()
-# draw_tree(root, 0, 300, 80)
-# turtle.done()
+# plt.figure(figsize=(10, 6))
+# plt.title('Dendrogram from Clustering Results')
+
+# plot_u_dendrogram(root)
+
+# plt.show()

@@ -87,19 +87,19 @@ def complete_linkage(data):
     n = len(clusters)
 
     while n > 1:
-        max_dist = float('-inf')
+        min_dist = float('inf')
         pair = (0, 0)
 
         for i in range(n):
             for j in range(i + 1, n):
                 cluster_dist = _complete_linkage_dist(dist_matrix, clusters[i], clusters[j])
 
-                if cluster_dist > max_dist:
-                    max_dist = cluster_dist
+                if cluster_dist < min_dist:
+                    min_dist = cluster_dist
                     pair = (i, j)
 
         cluster_i, cluster_j = pair
-        new_cluster = TreeNode(round(max_dist, 1), clusters[cluster_i], clusters[cluster_j])
+        new_cluster = TreeNode(round(min_dist, 1), clusters[cluster_i], clusters[cluster_j])
         clusters.append(new_cluster)
 
         del clusters[max(cluster_i, cluster_j)]
@@ -170,7 +170,7 @@ def _dist(x, y, axis=None):
 # df = pd.read_csv(path)
 
 # data = df.to_numpy()[:,1:]
-# k_means(data, k=6)
+# # k_means(data, k=6)
 
 
 # root = complete_linkage(data[:10])

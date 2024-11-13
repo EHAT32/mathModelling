@@ -114,7 +114,7 @@ def complete_linkage(data):
 def _complete_linkage_dist(dist_matrix, cluster_i, cluster_j):
     points_i = find_leaf_nodes(cluster_i)
     points_j = find_leaf_nodes(cluster_j)
-    return np.max(np.array([dist_matrix[points_i, point_j] for points_i in points_i for point_j in points_j]))
+    return np.max(dist_matrix[points_i, :][:, points_j])
 
 
 def single_linkage(data):
@@ -149,7 +149,7 @@ def single_linkage(data):
 def _single_linkage_dist(dist_matrix, cluster_i, cluster_j):
     points_i = find_leaf_nodes(cluster_i)
     points_j = find_leaf_nodes(cluster_j)
-    return np.min(np.array([dist_matrix[points_i, point_j] for points_i in points_i for point_j in points_j]))
+    return np.min(dist_matrix[points_i, :][:, points_j])
 
 
 def _dist_matrix(data):

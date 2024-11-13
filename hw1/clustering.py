@@ -166,17 +166,25 @@ def _dist_matrix(data):
 def _dist(x, y, axis=None):
     return np.linalg.norm(x - y, axis)
 
-def plot_u_dendrogram(node, x=0, y=0, dx=1):
-    if node is not None:
-        if node.left is not None:
-            plt.plot([x, x - dx], [y, y - 1], 'k-')  # Left line
-            plot_u_dendrogram(node.left, x - dx, y - 1, dx / 2)
+def plot_u_dendrogram(node, x=0, dx=10, prev = None):
 
-        if node.right is not None:
-            plt.plot([x, x + dx], [y, y - 1], 'k-')  # Right line
-            plot_u_dendrogram(node.right, x + dx, y - 1, dx / 2)
+    if not node.left and not node.right:
+        plt.plot([x, x], [prev.val, prev.val - 5], 'k-')
+        plt.text(x, prev.val - 6.5, str(node.val), ha='center', va='bottom', fontsize=10)
+        return
 
-        plt.text(x, y, str(node.val), ha='center', va='bottom', fontsize=10)
+    if not prev:
+        plt.plot([x, x], [node.val, node.val + 10], 'k-')
+    else:
+        plt.plot([x, x], [node.val, prev.val], 'k-')
+
+    if node.left:
+        plt.plot([x, x - dx], [node.val, node.val], 'k-')  # Left line
+        plot_u_dendrogram(node.left, x - dx, dx / 2, node)
+
+    if node.right:
+        plt.plot([x, x + dx], [node.val, node.val], 'k-')  # Right line
+        plot_u_dendrogram(node.right, x + dx, dx / 2, node)
 
 def bfs_k_classes_split(root, k):
     if not root:
@@ -222,12 +230,12 @@ def bfs_k_classes_split(root, k):
 # df = pd.read_csv(path)
 
 # data = df.to_numpy()[:,1:]
-# k_means(data, k=6)
+# # k_means(data, k=6)
 
 
-# root = complete_linkage(data[:10])
+# root = complete_linkage(data[:100])
 
-# plt.figure(figsize=(10, 6))
+# # plt.figure(figsize=(10, 6))
 # plt.title('Dendrogram from Clustering Results')
 
 # plot_u_dendrogram(root)

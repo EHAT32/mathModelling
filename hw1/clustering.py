@@ -27,7 +27,7 @@ def find_leaf_nodes(root):
 
 
 def draw_tree(node, x, y, dx):
-    if node is not None:
+    if node:
         # Draw the current node
         turtle.penup()
         turtle.goto(x, y)
@@ -35,14 +35,14 @@ def draw_tree(node, x, y, dx):
         turtle.write(node.val, align='center', font=('Comic sans', 12, 'normal'))
 
         #Left subtree
-        if node.left is not None:
+        if node.left:
             turtle.goto(x, y)
             turtle.pendown()
             turtle.goto(x - dx, y - 60)
             draw_tree(node.left, x - dx, y - 60, dx / 2)
         
         #Right subtree
-        if node.right is not None:
+        if node.right:
             turtle.penup()
             turtle.goto(x, y)
             turtle.pendown()
@@ -178,12 +178,51 @@ def plot_u_dendrogram(node, x=0, y=0, dx=1):
 
         plt.text(x, y, str(node.val), ha='center', va='bottom', fontsize=10)
 
+def bfs_k_classes_split(root, k):
+    if not root:
+        return []
+    
+    clusters = [root]
+    n = len(clusters)
+    leaves = []
+    while n < k:
+        clusters = sorted(clusters, key=lambda x: x.val)
+        node = clusters.pop()
+        node_left, node_right = node.left, node.right
+        if not node_left.left and not node_left.right:
+            leaves.append(node_left)
+        else:
+            clusters.append(node_left)
+        if not node_right.left and not node_right.right:
+            leaves.append(node_right)
+        else:
+            clusters.append(node_right)
+        n = len(clusters) + len(leaves)
+    
+    clusters = clusters + leaves
+
+    groups = []
+    points_num = 0
+    for cluster in clusters:
+        group = find_leaf_nodes(cluster)
+        points_num += len(group)
+        groups.append(group)
+
+    labels = np.zeros(points_num, dtype=np.int32)
+    label = 0
+    for group in groups:
+        labels[group] = label
+        label += 1
+
+
+    return labels
+
 # data = path = "./hw1/dataset1.csv"
 
 # df = pd.read_csv(path)
 
 # data = df.to_numpy()[:,1:]
-# # k_means(data, k=6)
+# k_means(data, k=6)
 
 
 # root = complete_linkage(data[:10])
@@ -194,3 +233,7 @@ def plot_u_dendrogram(node, x=0, y=0, dx=1):
 # plot_u_dendrogram(root)
 
 # plt.show()
+
+# clusters = bfs_k_classes_split(root, k=5)
+
+# print(clusters)

@@ -32,11 +32,14 @@ def f_3(data):
     new_df = new_df.rename(columns={'0' : 'x', '1' : 'y'})
     group = new_df.groupby('label')
     centroids = group.mean()
-    label_count = new_df['label'].value_counts().set_index('label')
-    print(label_count)
+    label_count = new_df['label'].value_counts().sort_index()
+    label_count = label_count.to_frame().to_numpy()
     new_df = new_df.merge(centroids, on='label', suffixes=('', '_centroid'))
     new_df['squared_dist'] = (new_df['x'] - new_df['x_centroid'])**2 + (new_df['y'] - new_df['y_centroid'])**2
-    total_var = new_df.groupby('label')['squared_dist'].sum().set_index('label')
+    total_var = new_df.groupby('label')['squared_dist'].sum().sort_index()
+    total_var = total_var.to_frame().to_numpy()
+    variance = np.divide(total_var, label_count)
+    return np.sum(variance)
 
 
 def _dist(p1, p2):

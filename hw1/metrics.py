@@ -15,7 +15,7 @@ def f_1(data : pd.DataFrame):
 def calculate_squared_distances(group):
     total_squared_distance = 0
     # Generate all unique pairs of points in the group
-    for (i, point1), (j, point2) in combinations(enumerate(group.itertuples()), 2):
+    for (_, point1), (_, point2) in combinations(enumerate(group.itertuples()), 2):
         total_squared_distance += _dist(point1, point2)
     return total_squared_distance
 
@@ -28,7 +28,16 @@ def f_2(data : pd.DataFrame):
     return total_dist.sum()
 
 def f_3(data):
-    pass
+    new_df = data.copy(deep=True)
+    new_df = new_df.rename(columns={'0' : 'x', '1' : 'y'})
+    group = new_df.groupby('label')
+    centroids = group.mean()
+    label_count = new_df['label'].value_counts().set_index('label')
+    print(label_count)
+    new_df = new_df.merge(centroids, on='label', suffixes=('', '_centroid'))
+    new_df['squared_dist'] = (new_df['x'] - new_df['x_centroid'])**2 + (new_df['y'] - new_df['y_centroid'])**2
+    total_var = new_df.groupby('label')['squared_dist'].sum().set_index('label')
+
 
 def _dist(p1, p2):
     return (p1.x - p2.x)**2 + (p1.y - p2.y)**2
@@ -39,4 +48,4 @@ df = pd.read_csv(path)
 
 res = f_2(df)
 
-print(f_1(df), f_2(df))
+print(f_1(df), f_2(df), f_3(df))

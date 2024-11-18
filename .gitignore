@@ -1,3 +1,3 @@
-dataset1.csv
+*.csv
 .vscode
 __pycache__

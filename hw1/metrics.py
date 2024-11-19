@@ -3,7 +3,7 @@ import pandas as pd
 from itertools import combinations
 
 def f_1(data : pd.DataFrame):
-    centroids = data.groupby('label').mean()
+    centroids = data.groupby('label').mean(numeric_only=True)
     centroids = centroids.rename(columns={0 : 'x', 1 : 'y'})
     new_df = data.copy(deep=True)
     new_df = new_df.rename(columns={0 : 'x', 1 : 'y'})
@@ -27,11 +27,11 @@ def f_2(data : pd.DataFrame):
     total_dist = group.apply(calculate_squared_distances)
     return total_dist.sum()
 
-def f_3(data):
+def f_3(data : pd.DataFrame):
     new_df = data.copy(deep=True)
     new_df = new_df.rename(columns={0 : 'x', 1 : 'y'})
     group = new_df.groupby('label')
-    centroids = group.mean()
+    centroids = group.mean(numeric_only=True)
     label_count = new_df['label'].value_counts().sort_index()
     label_count = label_count.to_frame().to_numpy()
     new_df = new_df.merge(centroids, on='label', suffixes=('', '_centroid'))
@@ -45,9 +45,9 @@ def f_3(data):
 def _dist(p1, p2):
     return (p1.x - p2.x)**2 + (p1.y - p2.y)**2
 
-path = "./hw1/single.csv"
+# path = "./hw1/single.csv"
 
-df = pd.read_csv(path)
-print(df)
+# df = pd.read_csv(path)
+# print(df)
 
-print(f_1(df), f_2(df), f_3(df))
+# print(f_1(df), f_2(df), f_3(df))

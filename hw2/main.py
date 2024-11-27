@@ -6,14 +6,17 @@ def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class ForestField:
-    def __init__(self, n=5, p = 0.2) -> None:
+    def __init__(self, n=5, p = 0.6) -> None:
         self.n = n
         self.field = np.zeros((self.n, self.n), dtype=np.int32)
         self.p = p
+        self.treesPreFire = []
+        self.treesPostFire = []
          
     def step(self):
         rand_vals = np.random.rand(*self.field.shape)
         self.draw(img)
+        self.treesPreFire.append(self.countTrees())
         #lightning strike
         self.field[np.logical_and(rand_vals > self.p, self.field == 1)] = -1
         self.draw(img)
@@ -25,6 +28,7 @@ class ForestField:
         self.draw(img)
         #forest growth
         self.field[rand_vals < self.p] = 1
+        self.treesPostFire.append(self.countTrees())
         self.draw(img)
         
     def fireSpread(self):
@@ -61,5 +65,5 @@ cmap = ListedColormap(['red', '#9f3b00', 'green'])
 img = ax.imshow(forest.field, cmap=cmap, interpolation='nearest')
 plt.colorbar(img)
 
-for i in range(1000):
+for i in range(100):
     forest.step()

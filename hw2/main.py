@@ -67,3 +67,5 @@ plt.colorbar(img)
 
 for i in range(100):
     forest.step()
+    
+plt.ioff()

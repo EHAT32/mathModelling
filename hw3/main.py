@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import time
+import matplotlib.pyplot as plt
 
 class ClubSystem:
     
@@ -31,11 +32,17 @@ class ClubSystem:
 
 
 def main():
-    itmo_clubs = ClubSystem(p = 0.4)
-    for _ in range(20):
+    itmo_clubs = ClubSystem(p = 0.5)
+    plt.ion()  # Turn on interactive mode
+    fig, ax = plt.subplots()
+    for _ in range(1000):
         itmo_clubs.step()
-        print(itmo_clubs.clubs)
-        time.sleep(1)
+        ax.bar((range(len(itmo_clubs.clubs))), itmo_clubs.clubs, color='blue')
+        ax.set_xlabel('Номер клуба')
+        ax.set_ylabel('Число людей в клубе')
+        plt.draw()
+        plt.pause(0.1)
+    plt.ioff()
     return
 
 if __name__ == '__main__':

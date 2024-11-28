@@ -13,7 +13,7 @@ class ForestField:
         self.treesPreFire = []
         self.treesPostFire = []
          
-    def step(self):
+    def step(self, burnAll = False):
         rand_vals = np.random.rand(*self.field.shape)
         self.draw(img)
         self.treesPreFire.append(self.countTrees())
@@ -21,7 +21,7 @@ class ForestField:
         self.field[np.logical_and(rand_vals > self.p, self.field == 1)] = -1
         self.draw(img)
         #fire spread
-        self.fireSpread()
+        self.fireSpread(burnAll)
         self.draw(img)
         #fire extinguish
         self.field[self.field == -1] = 0
@@ -31,7 +31,7 @@ class ForestField:
         self.treesPostFire.append(self.countTrees())
         self.draw(img)
         
-    def fireSpread(self):
+    def fireSpread(self, burnAll = False):
         dx = [-1, 0, 1, 0]
         dy = [0, 1, 0, -1]
         old_field = None
@@ -46,6 +46,8 @@ class ForestField:
                             continue
                         if self.field[i + dx[k]][j + dy[k]] == -1:
                             self.field[i][j] = -1
+            if not burnAll:
+                return
         
     def countTrees(self):
         return np.sum(self.field[self.field == 1])
@@ -66,6 +68,6 @@ img = ax.imshow(forest.field, cmap=cmap, interpolation='nearest')
 plt.colorbar(img)
 
 for i in range(100):
-    forest.step()
+    forest.step(burnAll=True)
     
 plt.ioff()

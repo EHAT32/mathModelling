@@ -1,6 +1,6 @@
 import numpy as np
 import random
-import time
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 class ClubSystem:
@@ -32,17 +32,18 @@ class ClubSystem:
 
 
 def main():
-    itmo_clubs = ClubSystem(p = 0.5)
-    plt.ion()  # Turn on interactive mode
+    itmo_clubs = ClubSystem(p = 0.4)
     fig, ax = plt.subplots()
-    for _ in range(1000):
+    while itmo_clubs.peopleNum < 100:
         itmo_clubs.step()
-        ax.bar((range(len(itmo_clubs.clubs))), itmo_clubs.clubs, color='blue')
-        ax.set_xlabel('Номер клуба')
-        ax.set_ylabel('Число людей в клубе')
-        plt.draw()
-        plt.pause(0.1)
-    plt.ioff()
+    ax.bar((range(len(itmo_clubs.clubs))), itmo_clubs.clubs, color='blue')
+    ax.set_xlabel('Номер клуба')
+    ax.set_ylabel('Число людей в клубе')
+    fig.suptitle(f"Число студентов: {itmo_clubs.peopleNum}")
+    # plt.ylim(0, np.max(itmo_clubs.clubs) * 1.05)
+    plt.show()
+    # plt.pause()
+    # plt.cla()
     return
 
 if __name__ == '__main__':

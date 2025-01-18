@@ -12,27 +12,27 @@ class ForestField:
         self.p = p
         self.treesPreFire = []
         self.treesPostFire = []
+        self.dirt = 0
+        self.tree = 1
+        self.fire = -1
          
     def step(self, burnAll = False):
-        dirt = 0
-        fire = -1
-        tree = 1
         cell = (np.random.randint(0, self.n), np.random.randint(0, self.n))
         rand_val = np.random.rand()
         self.draw(img)
         #forest growth
-        if self.field[cell[0], cell[1]] == dirt and rand_val < self.p:
+        if self.field[cell[0], cell[1]] == self.dirt and rand_val < self.p:
                 self.field[cell[0], cell[1]] = 1
         self.treesPreFire.append(self.countTrees())
         #lightning strike
-        if self.field[cell[0], cell[1]] == tree and rand_val >= self.p:
+        if self.field[cell[0], cell[1]] == self.tree and rand_val >= self.p:
             self.field[cell[0], cell[1]] = -1
         self.draw(img)
         #fire spread
         self.fireSpread(burnAll)
         self.draw(img)
         #fire extinguish
-        self.field[self.field == -1] = 0
+        self.field[self.field == self.fire] = self.dirt
         self.draw(img)
         self.treesPostFire.append(self.countTrees())
         self.draw(img)
@@ -43,28 +43,29 @@ class ForestField:
         old_field = None
         while old_field is None or (old_field != self.field).any():
             old_field = self.field.copy()
-            for i in range(self.n):
-                for j in range(self.n):
-                    for k in range(len(dx)):
-                        if not ( 0 <= i + dx[k] < self.n and 0 <= j + dy[k] < self.n):
-                            continue
-                        if self.field[i + dx[k]][j + dy[k]] == 0 or self.field[i][j] == 0:
-                            continue
-                        if self.field[i + dx[k]][j + dy[k]] == -1:
-                            self.field[i][j] = -1
+            fire_indices = np.where(self.field == self.fire)
+            fire_indices = list(zip(fire_indices[0], fire_indices[1]))
+            for idx in fire_indices:
+                i, j = idx
+                for k in range(len(dx)):
+                    if not ( 0 <= i + dx[k] < self.n and 0 <= j + dy[k] < self.n):
+                        continue
+                    if self.field[i + dx[k]][j + dy[k]] == self.dirt:
+                        continue
+                    self.field[i + dx[k]][j + dy[k]] = self.fire
             if not burnAll:
                 return
         
     def countTrees(self):
-        return np.sum(self.field[self.field == 1])
+        return np.sum(self.field[self.field == self.tree])
             
     def draw(self, img):
         img.set_array(self.field)
         plt.draw()
         plt.pause(0.1)
     
-n = 30
-forest = ForestField(n, p=9)
+n = 10
+forest = ForestField(n, p=0.9)
 
 
 plt.ion()  # Turn on interactive mode

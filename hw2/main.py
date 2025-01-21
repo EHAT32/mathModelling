@@ -13,7 +13,7 @@ class ForestField:
         self.treesPreFire = []
         self.treesPostFire = []
         self.fireSize = []
-        self.smallSize = smallSize
+        self.smallSize = min(n, smallSize)
         self.smallArea = []
         self.dirt = 0
         self.tree = 1
@@ -65,7 +65,7 @@ class ForestField:
         return np.sum(self.field[self.field == self.tree])
     
     def countFire(self):
-        return np.sum(self.field[self.field == self.fire])
+        return -np.sum(self.field[self.field == self.fire])
     
     def countSmallArea(self):
         idx = int(self.n / 2 - self.smallSize / 2)
@@ -87,7 +87,8 @@ cmap = ListedColormap(['red', '#9f3b00', 'green'])
 img = ax.imshow(forest.field, cmap=cmap, interpolation='nearest')
 plt.colorbar(img)
 
-for i in range(1000):
+for i in range(10000):
     forest.step(burnAll=True)
+    print(f"Step: {i}, fire size: {forest.fireSize[-1]}")
     
 plt.ioff()

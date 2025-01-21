@@ -6,12 +6,15 @@ def clear_console():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 class ForestField:
-    def __init__(self, n=5, p = 0.6) -> None:
+    def __init__(self, n=5, p = 0.6, smallSize = 50) -> None:
         self.n = n
         self.field = np.zeros((self.n, self.n), dtype=np.int32)
         self.p = p
         self.treesPreFire = []
         self.treesPostFire = []
+        self.fireSize = []
+        self.smallSize = smallSize
+        self.smallArea = []
         self.dirt = 0
         self.tree = 1
         self.fire = -1
@@ -30,11 +33,13 @@ class ForestField:
         self.draw(img)
         #fire spread
         self.fireSpread(burnAll)
+        self.fireSize.append(self.countFire())
         self.draw(img)
         #fire extinguish
         self.field[self.field == self.fire] = self.dirt
         self.draw(img)
         self.treesPostFire.append(self.countTrees())
+        self.smallArea.append(self.countSmallArea())
         self.draw(img)
         
     def fireSpread(self, burnAll = False):
@@ -58,6 +63,14 @@ class ForestField:
         
     def countTrees(self):
         return np.sum(self.field[self.field == self.tree])
+    
+    def countFire(self):
+        return np.sum(self.field[self.field == self.fire])
+    
+    def countSmallArea(self):
+        idx = int(self.n / 2 - self.smallSize / 2)
+        area = self.field[idx:idx+self.smallSize, idx:idx+self.smallSize]
+        return np.sum(area[area == self.tree])
             
     def draw(self, img):
         img.set_array(self.field)

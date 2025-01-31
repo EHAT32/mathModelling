@@ -1,50 +1,94 @@
-import numpy as np
-import random
-import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import os
+from matplotlib.colors import ListedColormap
+def clear_console():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
-class ClubSystem:
-    
-    def __init__(self, p = 0.1, clubs = []):
+class ForestField:
+    def __init__(self, n=5, p = 0.6, smallSize = 50) -> None:
+        self.n = n
+        self.field = np.zeros((self.n, self.n), dtype=np.int32)
         self.p = p
-        self.clubs = clubs
-        self.peopleNum = 0
-        self.weights = []
-        if len(self.clubs) > 0:
-            self.peopleNum = sum(self.clubs)
-        self.weights = self.updateWeights()
+        self.treesPreFire = []
+        self.treesPostFire = []
+        self.fireSize = []
+        self.smallSize = min(n, smallSize)
+        self.smallArea = []
+        self.dirt = 0
+        self.tree = 1
+        self.fire = -1
+         
+    def step(self, burnAll = False):
+        cell = (np.random.randint(0, self.n), np.random.randint(0, self.n))
+        rand_val = np.random.rand()
+        self.draw(img)
+        #forest growth
+        if self.field[cell[0], cell[1]] == self.dirt and rand_val < self.p:
+                self.field[cell[0], cell[1]] = 1
+        self.treesPreFire.append(self.countTrees())
+        #lightning strike
+        if self.field[cell[0], cell[1]] == self.tree and rand_val >= self.p:
+            self.field[cell[0], cell[1]] = -1
+        self.draw(img)
+        #fire spread
+        self.fireSpread(burnAll)
+        self.fireSize.append(self.countFire())
+        self.draw(img)
+        #fire extinguish
+        self.field[self.field == self.fire] = self.dirt
+        self.draw(img)
+        self.treesPostFire.append(self.countTrees())
+        self.smallArea.append(self.countSmallArea())
+        self.draw(img)
         
-    def step(self):
-        if np.random.rand() < self.p or len(self.clubs) == 0:
-            self.clubs.append(1)
-        else:
-            club = random.choices([k for k in range(len(self.clubs))], weights=self.weights, k = 1)[0]
-            self.clubs[club] += 1
-        self.peopleNum += 1
-        self.updateWeights()
+    def fireSpread(self, burnAll = False):
+        dx = [-1, 0, 1, 0, -1, -1, 1, 1]
+        dy = [0, 1, 0, -1, -1, 1, 1, -1]
+        old_field = None
+        while old_field is None or (old_field != self.field).any():
+            old_field = self.field.copy()
+            fire_indices = np.where(self.field == self.fire)
+            fire_indices = list(zip(fire_indices[0], fire_indices[1]))
+            for idx in fire_indices:
+                i, j = idx
+                for k in range(len(dx)):
+                    if not ( 0 <= i + dx[k] < self.n and 0 <= j + dy[k] < self.n):
+                        continue
+                    if self.field[i + dx[k]][j + dy[k]] == self.dirt:
+                        continue
+                    self.field[i + dx[k]][j + dy[k]] = self.fire
+            if not burnAll:
+                return
+        
+    def countTrees(self):
+        return np.sum(self.field[self.field == self.tree])
+    
+    def countFire(self):
+        return -np.sum(self.field[self.field == self.fire])
+    
+    def countSmallArea(self):
+        idx = int(self.n / 2 - self.smallSize / 2)
+        area = self.field[idx:idx+self.smallSize, idx:idx+self.smallSize]
+        return np.sum(area[area == self.tree])
             
-    def updateWeights(self):
-        if len(self.clubs) == 0:
-            self.weights = []
-            return
-        self.weights = [k / self.peopleNum for k in self.clubs]
+    def draw(self, img):
+        img.set_array(self.field)
+        plt.draw()
+        plt.pause(0.1)
+    
+n = 10
+forest = ForestField(n, p=0.9)
 
 
+plt.ion()  # Turn on interactive mode
+fig, ax = plt.subplots()
+cmap = ListedColormap(['red', '#9f3b00', 'green'])
+img = ax.imshow(forest.field, cmap=cmap, interpolation='nearest')
+plt.colorbar(img)
 
-def main():
-    itmo_clubs = ClubSystem(p = 0.4)
-    fig, ax = plt.subplots()
-    while itmo_clubs.peopleNum < 100:
-        itmo_clubs.step()
-    ax.bar((range(len(itmo_clubs.clubs))), itmo_clubs.clubs, color='blue')
-    ax.set_xlabel('Номер клуба')
-    ax.set_ylabel('Число людей в клубе')
-    fig.suptitle(f"Число студентов: {itmo_clubs.peopleNum}")
-    # plt.ylim(0, np.max(itmo_clubs.clubs) * 1.05)
-    plt.show()
-    # plt.pause()
-    # plt.cla()
-    return
-
-if __name__ == '__main__':
-    main()
+for i in range(10000):
+    forest.step(burnAll=True)
+    print(f"Step: {i}, fire size: {forest.fireSize[-1]}")
+    
+plt.ioff()
